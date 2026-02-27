@@ -1,0 +1,45 @@
+version: '3.8'
+
+services:
+  cassandra:
+    image: cassandra:4.1.1
+    container_name: cassandra-local
+    networks:
+      - cassandra-network
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=test_cluster # при смене нужно менять и параметр "cluster_name" в cassandra.yaml
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+    volumes:
+      - ./cassandra.yaml:/etc/cassandra/cassandra.yaml
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "cqlsh", "-u", "cassandra", "-p", "cassandra", "-e", "describe keyspaces" ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 40s
+
+  cassandra-init:
+    image: cassandra:4.1.1
+    container_name: cassandra-init
+    networks:
+      - cassandra-network
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./init.cql:/init.cql
+      - ./start.sh:/start.sh
+    entrypoint: [ "/bin/bash", "/start.sh" ]
+    environment:
+      - CASSANDRA_HOST=cassandra-local
+      - CASSANDRA_PORT=9042
+    restart: "no"
+
+networks:
+  cassandra-network:
+    driver: bridge
+    name: cassandra-local-network
