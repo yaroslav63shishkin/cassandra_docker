@@ -20,7 +20,7 @@ GRANT CREATE ON ALL KEYSPACES TO emiasntf;  -- Опционально
 -- Переключение на созданный keyspace
 USE task_management;
 
-CREATE TABLE task_management.task
+CREATE TABLE task
 (
     task_id           UUID,
     event_id          UUID,
@@ -36,7 +36,7 @@ CREATE TABLE task_management.task
     PRIMARY KEY (task_id)
 );
 
-CREATE TABLE task_management.ispk_event
+CREATE TABLE ispk_event
 (
     ispk_event_id     UUID,
     ispk_event_status TEXT,
@@ -44,4 +44,4 @@ CREATE TABLE task_management.ispk_event
     PRIMARY KEY (ispk_event_id)
 );
 
-CREATE INDEX ispk_event_task_id_idx ON task_management.ispk_event (task_id);
+CREATE INDEX ispk_event_task_id_idx ON ispk_event (task_id);
